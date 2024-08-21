@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
-use App\Models\bukuTamu;
-use Illuminate\Support\Facades\DB;
-use App\Models\kategoriModel;
-use App\Models\katalog;
+use Carbon\Carbon;
 use App\Models\User;
+use App\Models\katalog;
+use App\Models\bukuTamu;
+use Illuminate\Http\Request;
+use App\Models\kategoriModel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-
-
+use Symfony\Component\VarDumper\VarDumper;
 
 class buku_tamu_controller extends Controller
 {
@@ -20,13 +20,47 @@ class buku_tamu_controller extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    // public function index()
+    // {
+    //     $mobil = kategoriModel::where('kategori', 'Mobil')->get();
+    //     $motor = kategoriModel::where('kategori', 'Motor')->get();
+    //     $katalogs = katalog::All();
+    //     $hitung_hari_ini = BukuTamu::where('tanggal', date("Y-m-d"))->count();
+    //     if ($hitung_hari_ini > 4) {
+    //         $tambah = 1;
+    //     } else {
+    //         $tambah = 0;
+    //     }
+    //     if (auth()->check()) {
+    //         return view('bukuTamu', compact('mobil', 'motor', 'katalogs', 'hitung_hari_ini'));
+    //     } else {
+    //         return view('login');
+    //     }
+    // }
     public function index()
-    {   
+    {
+        // Ambil data kategori dan katalog
         $mobil = kategoriModel::where('kategori', 'Mobil')->get();
         $motor = kategoriModel::where('kategori', 'Motor')->get();
         $katalogs = katalog::All();
+        $hitung_hari_ini = BukuTamu::where('tanggal', date("Y-m-d"))->count();
+
+        // Menentukan tanggal yang memiliki jumlah booking kurang dari 4
+        $today = Carbon::now();
+        $maxDaysToCheck = 30; // Jumlah maksimum hari yang akan diperiksa
+        $availableDates = [];
+
+        for ($i = 0; $i < $maxDaysToCheck; $i++) {
+            $checkDate = $today->copy()->addDays($i)->format('Y-m-d');
+            $buku_tamu_count = BukuTamu::where('tanggal', $checkDate)->count();
+
+            if ($buku_tamu_count < 4) {
+                $availableDates[] = $checkDate;
+            }
+        }
+        // Mengecek apakah user sudah login
         if (auth()->check()) {
-            return view('bukuTamu', compact('mobil', 'motor','katalogs'));
+            return view('bukuTamu', compact('mobil', 'motor', 'katalogs', 'hitung_hari_ini', 'availableDates'));
         } else {
             return view('login');
         }
@@ -44,25 +78,25 @@ class buku_tamu_controller extends Controller
         // dd(Auth::User());
         return view('kasir');
     }
-    
 
-    
+
+
 
     public function dashboard()
     {
         return view('dashboard');
     }
 
-    
+
     public function data()
     {
-        $data=bukuTamu::paginate(5);
-        return view('data_buku_tamu',compact('data'));
+        $data = bukuTamu::paginate(5);
+        return view('data_buku_tamu', compact('data'));
     }
-    
+
     // public function tampil_data()
     // {
-        
+
     // }
 
     /**
@@ -70,8 +104,17 @@ class buku_tamu_controller extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
+        $tanggal = $request->input('tanggal');
+
+        // Menghitung jumlah tamu berdasarkan tanggal yang diterima
+        $buku_tamu_today = BukuTamu::where('tanggal', $tanggal)->count();
+
+        // Mengembalikan data dalam format JSON
+        return response()->json([
+            'jumlah_tamu' => $buku_tamu_today
+        ]);
         //
     }
 
@@ -82,42 +125,42 @@ class buku_tamu_controller extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-{
-    // Validate the request
-    $request->validate([
-        'gambar' => 'required', // Adjust as needed
-    ]);
+    {
+        // Validate the request
+        $request->validate([
+            'gambar' => 'required', // Adjust as needed
+        ]);
 
-    // Get the authenticated user's ID
-    $userId = auth()->id();
+        // Get the authenticated user's ID
+        $userId = auth()->id();
 
-    // Store the uploaded image
-    $gambarPath = $request->file('gambar')->store('', 'public');
+        // Store the uploaded image
+        $gambarPath = $request->file('gambar')->store('', 'public');
 
-    // Insert data into the database
-    DB::table('buku_tamu')->insert([
-        'id_user' => $userId,
-        'nama' => $request->nama,
-        'alamat' => $request->alamat,
-        'tipe_mobil' => isset($request->tipe_mobil) ? $request->tipe_mobil : null,
-        'tipe_motor' => isset($request->tipe_motor) ? $request->tipe_motor : null,
-        'no_hp' => $request->no_hp,
-        'paket_salon_motor' => isset($request->paket_salon_motor) ? $request->paket_salon_motor : null,
-        'paket_salon_mobil' => isset($request->paket_salon_mobil) ? $request->paket_salon_mobil : null,
-        'tanggal' => $request->tanggal,
-        'katalog' => $request->katalog,
-        'gambar' => $gambarPath,
-    ]);
+        // Insert data into the database
+        DB::table('buku_tamu')->insert([
+            'id_user' => $userId,
+            'nama' => $request->nama,
+            'alamat' => $request->alamat,
+            'tipe_mobil' => isset($request->tipe_mobil) ? $request->tipe_mobil : null,
+            'tipe_motor' => isset($request->tipe_motor) ? $request->tipe_motor : null,
+            'no_hp' => $request->no_hp,
+            'paket_salon_motor' => isset($request->paket_salon_motor) ? $request->paket_salon_motor : null,
+            'paket_salon_mobil' => isset($request->paket_salon_mobil) ? $request->paket_salon_mobil : null,
+            'tanggal' => $request->tanggal,
+            'katalog' => $request->katalog,
+            'gambar' => $gambarPath,
+        ]);
 
-    // Redirect with success message
-    return redirect()->route('buku_tamu.index')->with('success', 'Data berhasil disimpan!');
-}
+        // Redirect with success message
+        return redirect()->route('buku_tamu.index')->with('success', 'Data berhasil disimpan!');
+    }
 
 
     public function upload(Request $request)
     {
         // dd($request);
-         DB::table('kategori')->insert([
+        DB::table('kategori')->insert([
             'nama' => $request->nama,
             'desk' => $request->desk,
             'harga' => $request->harga,
@@ -144,7 +187,7 @@ class buku_tamu_controller extends Controller
 
         // $username = Auth::user()->name; // Menyimpan username pengguna yang sedang login
 
-         DB::table('katalogs')->insert([
+        DB::table('katalogs')->insert([
             'nama' => $request->nama,
             'harga' => $request->harga,
             'desk' => $request->desk,
@@ -178,11 +221,11 @@ class buku_tamu_controller extends Controller
         //
     }
 
-    public function delete($id)
+    public function deleteee($id)
     {
-        $data = buku_tamu::find ($id);
+        $data = bukuTamu::find($id);
         $data->delete();
-        return redirect('/transaksi')->with('success', 'Data berhasil dihapus!');
+        return redirect('/status')->with('success', 'Data berhasil dihapus!');
     }
 
     /**
@@ -198,41 +241,41 @@ class buku_tamu_controller extends Controller
     }
 
     public function updateBuktiPembayaran(Request $request)
-{
-    // Validasi input
-    $request->validate([
-        'Bukti_Tf' => 'required', // Validasi file gambar
-    ]);
+    {
+        // Validasi input
+        $request->validate([
+            'Bukti_Tf' => 'required', // Validasi file gambar
+        ]);
 
-    // Ambil ID pengguna yang sedang login
-    $userId = Auth::id();
-    Log::info('User ID:', ['userId' => $userId]);
+        // Ambil ID pengguna yang sedang login
+        $userId = Auth::id();
+        Log::info('User ID:', ['userId' => $userId]);
 
-    // Ambil data pengguna berdasarkan id_user
-    $bukuTamu = bukuTamu::where('id_user', $userId)->first();
-    Log::info('bukuTamu:', ['bukuTamu' => $bukuTamu]);
+        // Ambil data pengguna berdasarkan id_user
+        $bukuTamu = bukuTamu::where('id_user', $userId)->first();
+        Log::info('bukuTamu:', ['bukuTamu' => $bukuTamu]);
 
-    if ($bukuTamu) {
-        // Proses file gambar
-        $file = $request->file('Bukti_Tf');
-        $fileName = time() . '_' . $file->getClientOriginalName();
+        if ($bukuTamu) {
+            // Proses file gambar
+            $file = $request->file('Bukti_Tf');
+            $fileName = time() . '_' . $file->getClientOriginalName();
 
-        // Simpan file gambar di folder 'public/images/bukti_pembayaran'
-        $filePath = $file->storeAs('public/images/bukti_pembayaran', $fileName);
-        Log::info('File Path:', ['filePath' => $filePath]);
+            // Simpan file gambar di folder 'public/images/bukti_pembayaran'
+            $filePath = $file->storeAs('public/images/bukti_pembayaran', $fileName);
+            Log::info('File Path:', ['filePath' => $filePath]);
 
-        // Update kolom upload dengan nama file
-        $bukuTamu->Bukti_Tf = $fileName;
+            // Update kolom upload dengan nama file
+            $bukuTamu->Bukti_Tf = $fileName;
 
-        // Simpan perubahan menggunakan query builder untuk memastikan where id_user
-        $updateResult = bukuTamu::where('id_user', $userId)->update(['Bukti_Tf' => $fileName]);
-        Log::info('Update Result:', ['updateResult' => $updateResult]);
+            // Simpan perubahan menggunakan query builder untuk memastikan where id_user
+            $updateResult = bukuTamu::where('id_user', $userId)->update(['Bukti_Tf' => $fileName]);
+            Log::info('Update Result:', ['updateResult' => $updateResult]);
 
-        return redirect()->route('antri.customer');
-    } else {
-        return response()->json(['message' => 'Pengguna tidak ditemukan.'], 404);
+            return redirect()->route('antri.customer');
+        } else {
+            return response()->json(['message' => 'Pengguna tidak ditemukan.'], 404);
+        }
     }
-}
 
     /**
      * Remove the specified resource from storage.
@@ -246,7 +289,11 @@ class buku_tamu_controller extends Controller
         // dd($bukuTamu);
         // $bukuTamu->delete();
 
-        $delete = DB::table('buku_tamu')->where('id_user', $id)->delete();
+        DB::table('buku_tamu')
+            ->where('id', $id)
+            ->update(['status' => 'Di Batalkan']); // Ubah status sesuai kebutuhan
+
+        return redirect('/transaksi')->with('success', 'Data berhasil dibatalkan!');
 
         return redirect('/transaksi')->with('success', 'Data berhasil dihapus!');
     }

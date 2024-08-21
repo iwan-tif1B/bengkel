@@ -22,13 +22,13 @@ class InvoiceController extends Controller
     // }
     public function generateInvoice($id_user)
     {
-        $purchase = BukuTamu::where('id_user', $id_user)->where('status', 'Lunas')->first();
+        $purchase = BukuTamu::where('id', $id_user)->where('status', 'Lunas')->first();
 
         if ($purchase) {
-            $purchase->nama = $purchase->nama ?? '-';
-            $purchase->paket_salon_mobil = $purchase->paket_salon_mobil ?? '-';
-            $purchase->tanggal = $purchase->tanggal ?? '-';
-            $purchase->status = $purchase->status ?? '-';
+            $purchase->nama = ($purchase->nama ?? '-');
+            $purchase->paket_salon_mobil = ($purchase->paket_salon_mobil ?? '-');
+            $purchase->tanggal = ($purchase->tanggal ?? '-');
+            $purchase->status = ($purchase->status ?? '-');
 
             $pdf = Pdf::loadView('invoices.invoice', ['purchase' => $purchase]);
             return $pdf->download('invoice_' . $purchase->id_user . '.pdf');

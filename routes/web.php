@@ -135,6 +135,7 @@ Route::get('/kasir', [buku_tamu_controller::class, 'kasir']);
 Route::get('/approved/{id}', [TransaksiController::class, 'approved']);
 Route::get('/delete/{id}', [TransaksiController::class, 'delete']);
 Route::post('/upload', [buku_tamu_controller::class, 'upload'])->name('upload.kategori');
+Route::get('/buku_tamu/hitung_tamu', [buku_tamu_controller::class, 'hitung_tamu'])->name('buku_tamu.hitung_tamu');
 Route::post('/buku-tamu/Bukti_Tf-bukti-tf', [buku_tamu_controller::class, 'updateBuktiPembayaran'])->name('buku_tamu.update_bukti_tf');
 Route::post('/uploadmotor', [buku_tamu_controller::class, 'uploadmotor'])->name('upload.mootor');
 Route::post('/uploadKatalog', [buku_tamu_controller::class, 'uploadKatalog'])->name('upload.katalog');
@@ -144,6 +145,7 @@ Route::get('/status', [AuthController::class, 'status'])->name('antri.customer')
 // routes/web.php
 Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
 Route::delete('/delete/{id_user}', [buku_tamu_Controller::class, 'destroy'])->name('bukuTamu.destroy');
+Route::delete('/deleteee/{id}', [buku_tamu_Controller::class, 'deleteee'])->name('bukuTamu.delete');
 
 
 

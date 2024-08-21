@@ -65,42 +65,42 @@ class TransaksiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        $transaksi = Transaksi::find($id);
- 
-        // Cek jika data ditemukan
-        if (!$transaksi) {
-            return redirect()->back()->with('error', 'Data not found.');
-        }
-        
-         // Hapus data
-         $transaksi->delete();
+    // public function destroy(string $id)
+    // {
+    //     $transaksi = Transaksi::find($id);
 
-         // Redirect ke halaman sebelumnya dengan pesan sukses
-         return redirect()->back()->with('success', 'Data deleted successfully.');
-     
- 
+    //     // Cek jika data ditemukan
+    //     if (!$transaksi) {
+    //         return redirect()->back()->with('error', 'Data not found.');
+    //     }
 
-       
-       
-       
-       
-       
-        // Temukan data berdasarkan ID
-        $bukuTamu = bukuTamu::find($id);
-        
-        // Cek jika data ditemukan
-        if (!$bukuTamu) {
-            return redirect()->back()->with('error', 'Data not found.');
-        }
+    //     // Hapus data
+    //     $transaksi->delete();
 
-        // Hapus data
-        $bukuTamu->delete();
+    //     // Redirect ke halaman sebelumnya dengan pesan sukses
+    //     return redirect()->back()->with('success', 'Data deleted successfully.');
 
-        // Redirect ke halaman sebelumnya dengan pesan sukses
-        return redirect()->back()->with('success', 'Data deleted successfully.');
-    }
+
+
+
+
+
+
+
+    //     // Temukan data berdasarkan ID
+    //     $bukuTamu = bukuTamu::find($id);
+
+    //     // Cek jika data ditemukan
+    //     if (!$bukuTamu) {
+    //         return redirect()->back()->with('error', 'Data not found.');
+    //     }
+
+    //     // Hapus data
+    //     $bukuTamu->delete();
+
+    //     // Redirect ke halaman sebelumnya dengan pesan sukses
+    //     return redirect()->back()->with('success', 'Data deleted successfully.');
+    // }
 
     public function approved(string $id)
     {
@@ -120,15 +120,11 @@ class TransaksiController extends Controller
         // Update the record
         DB::table('buku_tamu')->where('id_user', $id)
             ->update([
-                 'nomor_antrian' => $newQueueNumber,
+                'nomor_antrian' => $newQueueNumber,
                 'status' => 'Lunas'
             ]);
 
         // Redirect with a success message
         return redirect()->route('transaksi')->with('success', 'Data updated successfully.');
     }
-
-
-
-
 }
