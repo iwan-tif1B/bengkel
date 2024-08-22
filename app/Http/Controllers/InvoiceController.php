@@ -52,7 +52,7 @@ class InvoiceController extends Controller
         if ($request->has('paket_salon')) {
             $query->where('tipe_motor', $request->input('paket_salon'));
         }
-
+        $query->where('status', 'Lunas');
         // Ambil data
         $bukuTamus = $query->get();
 

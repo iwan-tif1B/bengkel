@@ -22,11 +22,36 @@
         .text-right {
             text-align: right;
         }
+
+        .header-utama-2 {
+            font-size: 16pt !important;
+        }
+
+        .header-title {
+            font-size: 12pt !important;
+        }
     </style>
 </head>
 
 <body>
-    <h1>Invoice</h1>
+    <table width="100%" class="print">
+        <tr>
+            <td width="10%" align="center" vAlign="middle" style="border:none">
+                <img src="assets/images/logo.png" width="150px">
+            </td>
+            <td align="center" width="80%" style="border:none"><br>
+                <b class="header-utama-2"> X-CLUS MOTOCARE </b><br>
+                <font class="header-title"> Jl. Soekarno - Hatta No.4, Labuh Baru Tim Kec. Payung Sekaki, Kota
+                    Pekanbaru, Riau 28292<br>
+                    <br>
+                </font>
+            </td>
+            <td width="10%" align="center"style="border:none">
+                &nbsp;&nbsp;
+            </td>
+        </tr>
+    </table>
+    <br>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -52,18 +77,18 @@
                     <td>{{ $bukuTamu->tipe_mobil }}</td>
                     <td>{{ $bukuTamu->tipe_motor }}</td>
                     <td>{{ $bukuTamu->kategori->nama }}</td>
-                    <td>Rp. {{ number_format($bukuTamu->kategori->harga, 0) }}</td>
+                    <td>{{ number_format($bukuTamu->kategori->harga, 0) }}</td>
                     <td>{{ $bukuTamu->katalogs->nama }}</td>
-                    <td>Rp. {{ number_format($bukuTamu->katalogs->harga, 0) }}</td>
+                    <td>{{ number_format($bukuTamu->katalogs->harga, 0) }}</td>
                     <td>{{ $bukuTamu->tanggal }}</td>
                     <td>{{ $bukuTamu->status }}</td>
                 </tr>
             @endforeach
             <tr>
                 <td colspan="6" class="text-right">Total</td>
-                <td>Rp. {{ number_format($totalHargaPaket, 0) }}</td>
+                <td>{{ number_format($totalHargaPaket, 0) }}</td>
                 <td>&nbsp;</td>
-                <td>Rp. {{ number_format($totalHargaKatalog, 0) }}</td>
+                <td>{{ number_format($totalHargaKatalog, 0) }}</td>
                 <td colspan="4"></td>
             </tr>
         </tbody>

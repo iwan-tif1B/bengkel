@@ -126,11 +126,14 @@
                                             </form>
 
                                         </div>
-                                        <div class="col-lg-2">&nbsp;&nbsp;&nbsp;&nbsp;
+                                        {{-- <div class="col-lg-2">&nbsp;&nbsp;&nbsp;&nbsp;
                                             <a href="{{ route('generate.invoice_all') }}"
                                                 class="btn btn-primary mt-4 ml-5">Download PDF</a>
+                                        </div> --}}
+                                        <div class="col-lg-2">
+                                            <a href="{{ route('generate.invoice_all', request()->query()) }}"
+                                                class="btn btn-primary mt-4 ml-5">Download PDF</a>
                                         </div>
-
                                     </div>
                                     {{-- <div class="table-responsive">
                                         <table class="table table-bordered">
