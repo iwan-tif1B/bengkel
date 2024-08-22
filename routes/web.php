@@ -88,9 +88,10 @@ Route::get('/upload', function () {
 });
 
 
-Route::get('/pembayaran', function () {
-    return view('pembayaran');
-});
+// Route::get('/pembayaran/{id}', function () {
+//     return view('pembayaran');
+// });
+Route::get('/pembayaran/{id}', [TransaksiController::class, 'create']);
 
 
 Route::get('/uploadKatalog', function () {
@@ -114,6 +115,8 @@ Route::get('/ownerproduk', function () {
     return view('ownerproduk', compact('bukuTamus'));
 });
 
+
+
 Route::get('/kasirsize', function () {
     $bukuTamus = kategoriModel::all();
     return view('kasirsize', compact('bukuTamus'));
@@ -125,6 +128,9 @@ Route::get('/kasirsize', function () {
 // });
 
 Route::get('/penjualan', [PenjualanController::class, 'index']);
+Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
+Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
+Route::get('/penjualan/create', [PenjualanController::class, 'create'])->name('penjualan.create');
 // Route::get('/transaksi', [TransaksiController::class, 'index']);
 Route::get('/pemesanan', [TransaksiController::class, 'pemesanan']);
 Route::get('/dashboard', [buku_tamu_controller::class, 'dashboard']);
@@ -133,10 +139,11 @@ Route::resource('/buku_tamu', buku_tamu_controller::class);
 Route::get('/admin_buku_tamu', [buku_tamu_controller::class, 'data']);
 Route::get('/kasir', [buku_tamu_controller::class, 'kasir']);
 Route::get('/approved/{id}', [TransaksiController::class, 'approved']);
+Route::get('/lihat_gambar/{id}/{type}', [TransaksiController::class, 'update'])->name('lihat_gambar');
 Route::get('/delete/{id}', [TransaksiController::class, 'delete']);
 Route::post('/upload', [buku_tamu_controller::class, 'upload'])->name('upload.kategori');
 Route::get('/buku_tamu/hitung_tamu', [buku_tamu_controller::class, 'hitung_tamu'])->name('buku_tamu.hitung_tamu');
-Route::post('/buku-tamu/Bukti_Tf-bukti-tf', [buku_tamu_controller::class, 'updateBuktiPembayaran'])->name('buku_tamu.update_bukti_tf');
+Route::post('/buku-tamu/Bukti_Tf-bukti-tf/{id}', [buku_tamu_controller::class, 'updateBuktiPembayaran'])->name('buku_tamu.update_bukti_tf');
 Route::post('/uploadmotor', [buku_tamu_controller::class, 'uploadmotor'])->name('upload.mootor');
 Route::post('/uploadKatalog', [buku_tamu_controller::class, 'uploadKatalog'])->name('upload.katalog');
 Route::get('/antri', [AuthController::class, 'antrian'])->name('antri.customer');
@@ -162,5 +169,6 @@ Route::get('/register', function () {
 
 // Invoice
 Route::get('/invoice/{id_user}', [InvoiceController::class, 'generateInvoice'])->name('generate.invoice');
+Route::get('/invoiceall', [InvoiceController::class, 'generateInvoiceall'])->name('generate.invoice_all');
 // filter
 Route::get('/transactions/filter', [FilterController::class, 'filterTransactions'])->name('filter.transactions');

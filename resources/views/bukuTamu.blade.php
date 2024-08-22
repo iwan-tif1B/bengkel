@@ -60,7 +60,7 @@
                                 <div class="form-group">
                                     <label for="exampleInputUsername1">Nama<span class="required">*</span></label>
                                     <input type="text" class="form-control" name="nama"
-                                        value="{{ Auth::user()->name }}" readonly>
+                                        value="{{ Auth::user()->email }}" readonly>
                                 </div>
 
                                 <div class="form-group">
@@ -78,11 +78,11 @@
                                 </div>
 
                                 <div class="form-group" id="mobil_section">
-                                    <label for="paket_salon_mobil">Paket Salon Mobil</label><span class="required">*</span>
+                                    <label for="paket_salon_mobil">Pilih Paket</label><span class="required">*</span>
                                     <select id="paket_salon_mobil" name="paket_salon_mobil" class="form-control">
                                         <option value="">Pilih Paket Salon Mobil</option>
                                         @foreach ($mobil as $item)
-                                            <option value="{{ $item->nama }}">{{ $item->nama }} | {{ $item->harga }}
+                                            <option value="{{ $item->id }}">{{ $item->nama }} | {{ $item->harga }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -106,7 +106,7 @@
                                     <select id="paket_salon_motor" name="paket_salon_motor" class="form-control">
                                         <option value="">Pilih Paket Salon Motor</option>
                                         @foreach ($motor as $item)
-                                            <option value="{{ $item->nama }}">{{ $item->nama }} | {{ $item->harga }}
+                                            <option value="{{ $item->id }}">{{ $item->nama }} | {{ $item->harga }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -128,7 +128,7 @@
                                     <select id="katalog" name="katalog" class="form-control">
                                         <option value="">Pilih katalog</option>
                                         @foreach ($katalogs as $item)
-                                            <option value="{{ $item->nama }}">{{ $item->nama }} |
+                                            <option value="{{ $item->id }}">{{ $item->nama }} |
                                                 {{ $item->harga }}</option>
                                         @endforeach
                                     </select>

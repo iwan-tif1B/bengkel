@@ -136,20 +136,34 @@ class buku_tamu_controller extends Controller
 
         // Store the uploaded image
         $gambarPath = $request->file('gambar')->store('', 'public');
+        if ($request->hasFile('gambar')) {
+            $file = $request->file('gambar');
+            $fileContent = file_get_contents($file->getRealPath());
+            $base64File = base64_encode($fileContent);
+            $mimeType = $file->getMimeType(); // Mendapatkan tipe MIME file
+
+            // Format string Base64 dengan tipe MIME
+            $base64Image = 'data:' . $mimeType . ';base64,' . $base64File;
+
+            Log::info('Base64 Image:', ['base64Image' => $base64Image]);
+
+            // Simpan string Base64 dalam database
+        }
 
         // Insert data into the database
         DB::table('buku_tamu')->insert([
             'id_user' => $userId,
             'nama' => $request->nama,
             'alamat' => $request->alamat,
-            'tipe_mobil' => isset($request->tipe_mobil) ? $request->tipe_mobil : null,
-            'tipe_motor' => isset($request->tipe_motor) ? $request->tipe_motor : null,
+            'tipe_mobil' => ($request->tipe_mobil ?? $request->tipe_motor),
+            'tipe_motor' => ($request->paket_salon ?? ""),
             'no_hp' => $request->no_hp,
+            'paket_salon_mobil' => $request->paket_salon_mobil ?? $request->paket_salon_motor,
             'paket_salon_motor' => isset($request->paket_salon_motor) ? $request->paket_salon_motor : null,
-            'paket_salon_mobil' => isset($request->paket_salon_mobil) ? $request->paket_salon_mobil : null,
             'tanggal' => $request->tanggal,
             'katalog' => $request->katalog,
-            'gambar' => $gambarPath,
+            'status' => 'Belum Di Bayar',
+            'gambar' => $base64Image,
         ]);
 
         // Redirect with success message
@@ -235,47 +249,96 @@ class buku_tamu_controller extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update($id)
     {
-        //
+        $data = bukuTamu::find($id);
+        // Assuming $gambar contains the Base64 string with data URL prefix
+        return view('penjualan_v2.blade', compact('data'));
     }
 
-    public function updateBuktiPembayaran(Request $request)
+
+    // public function updateBuktiPembayaran($id)
+    // {
+    //     // Validasi input
+    //     $request->validate([
+    //         'Bukti_Tf' => 'required', // Validasi file gambar
+    //     ]);
+
+    //     // Ambil ID pengguna yang sedang login
+    //     $userId = Auth::id();
+    //     Log::info('User ID:', ['userId' => $userId]);
+
+    //     // Ambil data pengguna berdasarkan id_user
+    //     $bukuTamu = bukuTamu::where('id', $id)->first();
+    //     $bukuTamu->status = "Menunggu Konfirmasi";
+
+    //     if ($bukuTamu) {
+    //         // Proses file gambar
+    //         $file = $request->file('Bukti_Tf');
+    //         $fileName = time() . '_' . $file->getClientOriginalName();
+
+    //         // Simpan file gambar di folder 'public/images/bukti_pembayaran'
+    //         $filePath = $file->storeAs('public/images/bukti_pembayaran', $fileName);
+    //         Log::info('File Path:', ['filePath' => $filePath]);
+
+    //         // Update kolom upload dengan nama file
+    //         $bukuTamu->Bukti_Tf = $fileName;
+
+    //         // Simpan perubahan menggunakan query builder untuk memastikan where id_user
+    //         $updateResult = bukuTamu::where('id_user', $userId)->update(['Bukti_Tf' => $fileName]);
+    //         Log::info('Update Result:', ['updateResult' => $updateResult]);
+
+    //         return redirect()->route('antri.customer');
+    //     } else {
+    //         return response()->json(['message' => 'Pengguna tidak ditemukan.'], 404);
+    //     }
+    // }
+    public function updateBuktiPembayaran(Request $request, $id)
     {
         // Validasi input
         $request->validate([
-            'Bukti_Tf' => 'required', // Validasi file gambar
+            'Bukti_Tf' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi file sebagai gambar dan ukuran maksimum
         ]);
 
         // Ambil ID pengguna yang sedang login
         $userId = Auth::id();
         Log::info('User ID:', ['userId' => $userId]);
 
-        // Ambil data pengguna berdasarkan id_user
-        $bukuTamu = bukuTamu::where('id_user', $userId)->first();
-        Log::info('bukuTamu:', ['bukuTamu' => $bukuTamu]);
+        // Ambil data berdasarkan ID
+        $bukuTamu = bukuTamu::find($id);
 
         if ($bukuTamu) {
-            // Proses file gambar
-            $file = $request->file('Bukti_Tf');
-            $fileName = time() . '_' . $file->getClientOriginalName();
+            // Update status ke "Menunggu Konfirmasi"
+            $bukuTamu->status = "Menunggu Konfirmasi";
 
-            // Simpan file gambar di folder 'public/images/bukti_pembayaran'
-            $filePath = $file->storeAs('public/images/bukti_pembayaran', $fileName);
-            Log::info('File Path:', ['filePath' => $filePath]);
+            // Proses file gambar jika ada
+            if ($request->hasFile('Bukti_Tf')) {
+                $file = $request->file('Bukti_Tf');
+                $fileContent = file_get_contents($file->getRealPath());
+                $base64File = base64_encode($fileContent);
+                $mimeType = $file->getMimeType(); // Mendapatkan tipe MIME file
 
-            // Update kolom upload dengan nama file
-            $bukuTamu->Bukti_Tf = $fileName;
+                // Format string Base64 dengan tipe MIME
+                $base64Image = 'data:' . $mimeType . ';base64,' . $base64File;
 
-            // Simpan perubahan menggunakan query builder untuk memastikan where id_user
-            $updateResult = bukuTamu::where('id_user', $userId)->update(['Bukti_Tf' => $fileName]);
-            Log::info('Update Result:', ['updateResult' => $updateResult]);
+                Log::info('Base64 Image:', ['base64Image' => $base64Image]);
 
-            return redirect()->route('antri.customer');
+                // Simpan string Base64 dalam database
+                $bukuTamu->Bukti_Tf = $base64Image;
+            }
+
+            // Simpan perubahan ke database
+            $bukuTamu->save();
+
+            Log::info('Update Result:', ['bukuTamu' => $bukuTamu]);
+
+            return redirect()->route('antri.customer')->with('success', 'Bukti pembayaran berhasil diupload.');
         } else {
             return response()->json(['message' => 'Pengguna tidak ditemukan.'], 404);
         }
     }
+
+
 
     /**
      * Remove the specified resource from storage.

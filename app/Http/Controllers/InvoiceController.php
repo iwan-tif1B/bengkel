@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BukuTamu;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
@@ -35,5 +36,45 @@ class InvoiceController extends Controller
         } else {
             return redirect()->back()->with('error', 'Pembelian tidak ditemukan atau belum lunas.');
         }
+    }
+
+
+    public function generateInvoiceall(Request $request)
+    {
+        $query = BukuTamu::query();
+
+        // Filter berdasarkan parameter request jika ada
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            $query->whereBetween('tanggal', [$startDate, $endDate]);
+        }
+        if ($request->has('paket_salon')) {
+            $query->where('tipe_motor', $request->input('paket_salon'));
+        }
+
+        // Ambil data
+        $bukuTamus = $query->get();
+
+        // Hitung total harga paket dan katalog
+        $totalHargaPaket = $bukuTamus->sum(function ($item) {
+            return $item->kategori->harga;
+        });
+
+        $totalHargaKatalog = $bukuTamus->sum(function ($item) {
+            return $item->katalogs->harga;
+        });
+
+        // Generate PDF
+        $pdf = PDF::loadView('pdf.invoice', [
+            'bukuTamus' => $bukuTamus,
+            'totalHargaPaket' => $totalHargaPaket,
+            'totalHargaKatalog' => $totalHargaKatalog,
+        ]);
+
+        // Set orientation to landscape
+        $pdf->setPaper('A4', 'landscape');
+
+        return $pdf->download('invoice.pdf');
     }
 }

@@ -20,6 +20,9 @@
     <link rel="stylesheet" href="{{ asset('assets/css/vertical-layout-light/style.css') }}">
     <!-- endinject -->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" />
+    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/fontawesome.min.css"
+        integrity="sha512-B46MVOJpI6RBsdcU307elYeStF2JKT87SsHZfRSkjVi4/iZ3912zXi45X5/CBr/GbCyLx6M1GQtTKYRd52Jxgw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" /> --}}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -128,36 +131,85 @@
                 </ul>
             </nav>
             <!-- partial -->
-            <div class="main-panel">
+            <div class="main-panel bg-dark">
                 <div class="content-wrapper">
                     <div class="row">
                         <div class="col-lg-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-lg-3">
+                                            <div class="row p-3 border rounded text-center bg-success text-light mx-1">
+                                                <div class="col-12">
+                                                    Total Motor ({{ $count_motor }})
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="row p-3 border rounded text-center bg-info text-light mx-1">
+                                                <div class="col-12">
+                                                    Total Mobil ({{ $count_mobil }})
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="row p-3 border rounded text-center bg-primary text-light mx-1">
+                                                <div class="col-12">
+                                                    Jumlah Orderan ({{ $count_orderan }})
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div
+                                                class="row p-3 border rounded text-center bg-secondary text-light mx-1">
+                                                <div class="col-12">Total Pendapatan (Rp.
+                                                    {{ number_format($total_semua, 0) }})
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 grid-margin stretch-card">
+                            <div class="card">
+                                <div class="card-body">
                                     <h4 class="card-title">Data Transaksi</h4>
-
-                                    <!-- Form untuk filter berdasarkan tanggal -->
-                                    <form action="{{ route('filter.transactions') }}" method="GET" class="mb-4">
+                                    <form action="{{ route('transaksi') }}" method="GET" class="mb-4">
                                         <div class="form-row">
-                                            <div class="col-md-4">
-
-                                                <label for="start_date" class="text-black">Tanggal Mulai:</label>
+                                            <div class="col-lg-3">
+                                                <label for="start_date" class="text-black">Tanggal
+                                                    Mulai:</label>
                                                 <input type="date" name="start_date" id="start_date"
                                                     class="form-control" value="{{ request('start_date') }}">
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-lg-3">
                                                 <label for="end_date" class="text-black">Tanggal Akhir:</label>
                                                 <input type="date" name="end_date" id="end_date"
                                                     class="form-control" value="{{ request('end_date') }}">
                                             </div>
-                                            <div class="col-md-4 align-self-end">
-                                                <button type="submit" class="btn btn-primary mt-2">Filter</button>
+                                            <div class="col-lg-2">
+                                                <label for="paket_salon">Jenis Paket</label>
+                                                <select id="paket_salon" name="paket_salon" class="form-control">
+                                                    <option value="Mobil"
+                                                        {{ request('paket_salon') == 'Mobil' ? 'selected' : '' }}>
+                                                        Paket Salon Mobil</option>
+                                                    <option value="Motor"
+                                                        {{ request('paket_salon') == 'Motor' ? 'selected' : '' }}>
+                                                        Paket Salon Motor</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-2 align-self-end">
+                                                <button type="submit" class="btn btn-primary mt-2"> <i
+                                                        class="fa-solid fa-file-pdf"></i>Filter</button>
                                             </div>
                                         </div>
                                     </form>
 
                                     <div class="table-responsive">
-                                        <table class="table table-bordered">
+                                        {{-- <table class="table table-bordered">
                                             <!-- Tabel transaksi Anda -->
                                             <thead>
                                                 <tr>
@@ -222,6 +274,103 @@
                                                     </tr>
                                                 @endforeach
                                             </tbody>
+                                        </table> --}}
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nama</th>
+                                                    <th>Alamat</th>
+                                                    <th>No HP</th>
+                                                    <th>Tipe Kendaraan</th>
+                                                    <th>Tipe Paket</th>
+                                                    <th>Nama Paket</th>
+                                                    <th>Harga Paket</th>
+                                                    <th>Katalog</th>
+                                                    <th>Harga Katalog</th>
+                                                    <th>Tanggal</th>
+                                                    <th>Gambar</th>
+                                                    <th>Bukti Pembayaran</th>
+                                                    <th>Status</th>
+                                                    @if (auth()->user()->role == 'cashier')
+                                                        <th>Aksi</th>
+                                                        <th>Opsi</th>
+                                                    @endif
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($bukuTamus as $bukuTamu)
+                                                    <tr>
+                                                        <td>{{ $bukuTamu->user->email }}</td>
+                                                        <td>{{ $bukuTamu->alamat }}</td>
+                                                        <td>{{ $bukuTamu->no_hp }}</td>
+                                                        <td>{{ $bukuTamu->tipe_mobil }}</td>
+                                                        <td>{{ $bukuTamu->tipe_motor }}</td>
+                                                        <td>{{ $bukuTamu->kategori->nama }}</td>
+                                                        <td>Rp. {{ number_format($bukuTamu->kategori->harga, 0) }}</td>
+                                                        <td>{{ $bukuTamu->katalogs->nama }}</td>
+                                                        <td>Rp. {{ number_format($bukuTamu->katalogs->harga, 0) }}</td>
+                                                        <td>{{ $bukuTamu->tanggal }}</td>
+                                                        <td>
+                                                            @if ($bukuTamu->gambar)
+                                                                <a href="{{ route('lihat_gambar', ['id' => $bukuTamu->id, 'type' => 'gambar']) }}"
+                                                                    target="_blank">Lihat Gambar</a>
+                                                            @else
+                                                                Belum diunggah
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if ($bukuTamu->Bukti_Tf)
+                                                                <a href="{{ route('lihat_gambar', ['id' => $bukuTamu->id, 'type' => 'bukti']) }}"
+                                                                    target="_blank">Lihat Bukti Pembayaran</a>
+                                                            @else
+                                                                <a href="/pembayaran"
+                                                                    class="text-warning font-weight-bold">Belum
+                                                                    dibayar</a>
+                                                            @endif
+                                                        </td>
+                                                        <td>{{ $bukuTamu->status }}</td>
+                                                        @if (auth()->user()->role == 'cashier')
+                                                            <td>
+                                                                @if ($bukuTamu->status === 'Lunas')
+                                                                    -
+                                                                @else
+                                                                    <a href="/approved/{{ $bukuTamu->id }}"
+                                                                        class="btn btn-success mr-2"
+                                                                        data-confirm="Apakah Anda ingin melunaskan tagihan ini?">Lunas</a>
+
+                                                            </td>
+                                                        @endif
+
+                                                        <td>
+                                                            @if ($bukuTamu->status === 'Di Batalkan')
+                                                                <p>Transaksi Sudah Dibatalkan</p>
+                                                            @elseif ($bukuTamu->status === 'Belum Di Bayar')
+                                                                <form
+                                                                    action="{{ route('bukuTamu.destroy', $bukuTamu->id) }}"
+                                                                    method="POST"
+                                                                    onsubmit="return confirm('Apakah Anda yakin ingin membatalkan item ini?');">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit"
+                                                                        class="btn btn-danger">Batal</button>
+                                                                </form>
+                                                            @elseif ($bukuTamu->status === 'Menunggu Konfirmasi')
+                                                                <p>Menunggu Konfirmasi</p>
+                                                            @else
+                                                                <p>Lunas</p>
+                                                            @endif
+                                                        </td>
+                                                @endif
+                                                </tr>
+                                                @endforeach
+                                                <tr>
+                                                    <td colspan="6">Total</td>
+                                                    <td>Rp. {{ number_format($totalHargaPaket, 0) }}</td>
+                                                    <td>&nbsp;</td>
+                                                    <td>Rp. {{ number_format($totalHargaKatalog, 0) }}</td>
+                                                    <td colspan="4"></td>
+                                                </tr>
+                                            </tbody>
                                         </table>
                                     </div>
                                 </div>
@@ -268,6 +417,19 @@
         <img class="modal-content" id="img01">
         <div id="caption"></div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Attach event listeners to all links with data-confirm attribute
+            document.querySelectorAll('a[data-confirm]').forEach(function(link) {
+                link.addEventListener('click', function(event) {
+                    var message = this.getAttribute('data-confirm');
+                    if (!confirm(message)) {
+                        event.preventDefault(); // Prevent the link from being followed
+                    }
+                });
+            });
+        });
+    </script>
 
     <script>
         // Get the modal

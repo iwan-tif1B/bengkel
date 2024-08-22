@@ -12,10 +12,45 @@ class TransaksiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $bukuTamus = bukuTamu::all();
-        return view('transaksi', compact('bukuTamus')); //
+        $query = BukuTamu::query();
+
+        // Filter berdasarkan parameter request jika ada
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            $query->whereBetween('tanggal', [$startDate, $endDate]);
+        }
+        if ($request->has('paket_salon')) {
+            $query->where('tipe_motor', $request->input('paket_salon'));
+        }
+        // $query->where('status', 'Lunas');
+        // Ambil data
+        $bukuTamus = $query->get();
+
+
+
+        // Hitung total harga paket dan katalog
+        $totalHargaPaket = $bukuTamus->sum(function ($item) {
+            return $item->kategori->harga;
+        });
+
+        $totalHargaKatalog = $bukuTamus->sum(function ($item) {
+            return $item->katalogs->harga;
+        });
+
+        // count
+        $count_orderan = $bukuTamus->count();
+        $count_mobil = $bukuTamus->where('tipe_motor', 'Mobil')->count();
+        $count_motor = $bukuTamus->where('tipe_motor', 'Motor')->count();
+        $total_semua =  $totalHargaPaket + $totalHargaKatalog;
+
+        // Kirim data ke view
+        return view(
+            'transaksi',
+            compact('bukuTamus', 'totalHargaPaket', 'totalHargaKatalog', 'total_semua', 'count_orderan', 'count_mobil', 'count_motor')
+        );
     }
     public function pemesanan()
     {
@@ -26,9 +61,11 @@ class TransaksiController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(string $id)
     {
         //
+        $data = bukuTamu::find($id);
+        return view('pembayaran', compact('data'));
     }
 
     /**
@@ -57,9 +94,17 @@ class TransaksiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update($id, $type)
     {
-        //
+        $tamu = bukuTamu::find($id);
+        if ($type === 'bukti') {
+            $data = $tamu->Bukti_Tf;
+        } else {
+            $data = $tamu->gambar;
+        }
+
+        // Assuming $gambar contains the Base64 string with data URL prefix
+        return view('lihat_gambar', compact('data'));
     }
 
     /**
@@ -105,7 +150,7 @@ class TransaksiController extends Controller
     public function approved(string $id)
     {
         // Find the record with the specific ID
-        $data = DB::table('buku_tamu')->where('id_user', $id)->get();
+        $data = DB::table('buku_tamu')->where('id', $id)->get();
 
         // Check if the record was found
         if (!$data) {
@@ -118,7 +163,7 @@ class TransaksiController extends Controller
         $newQueueNumber = $lastQueueNumber + 1;
 
         // Update the record
-        DB::table('buku_tamu')->where('id_user', $id)
+        DB::table('buku_tamu')->where('id', $id)
             ->update([
                 'nomor_antrian' => $newQueueNumber,
                 'status' => 'Lunas'

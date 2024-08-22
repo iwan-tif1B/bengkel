@@ -94,12 +94,13 @@
                                                 <tr>
                                                     <th>Nama</th>
                                                     <th>Alamat</th>
-                                                    <th>Tipe Mobil</th>
-                                                    <th>Tipe Motor</th>
                                                     <th>No HP</th>
-                                                    <th>Paket Salon Mobil</th>
-                                                    <th>Paket Salon Motor</th>
+                                                    <th>Tipe Kendaraan</th>
+                                                    <th>Tipe Paket</th>
+                                                    <th>Nama Paket</th>
+                                                    <th>Harga Paket</th>
                                                     <th>Katalog</th>
+                                                    <th>Harga Katalog</th>
                                                     <th>Tanggal</th>
                                                     <th>Gambar</th>
                                                     <th>Bukti TF</th>
@@ -118,18 +119,20 @@
                                             <tbody>
                                                 @foreach ($bukuTamus as $bukuTamu)
                                                     <tr>
-                                                        <td>{{ $bukuTamu->nama }}</td>
+                                                        <td>{{ $bukuTamu->user->email }}</td>
                                                         <td>{{ $bukuTamu->alamat }}</td>
+                                                        <td>{{ $bukuTamu->no_hp }}</td>
                                                         <td>{{ $bukuTamu->tipe_mobil }}</td>
                                                         <td>{{ $bukuTamu->tipe_motor }}</td>
-                                                        <td>{{ $bukuTamu->no_hp }}</td>
-                                                        <td>{{ $bukuTamu->paket_salon_mobil }}</td>
-                                                        <td>{{ $bukuTamu->paket_salon_motor }}</td>
-                                                        <td>{{ $bukuTamu->katalog }}</td>
+                                                        <td>{{ $bukuTamu->kategori->nama }}</td>
+                                                        <td>Rp. {{ number_format($bukuTamu->kategori->harga, 0) }}</td>
+                                                        <td>{{ $bukuTamu->katalogs->nama }}</td>
+                                                        <td>Rp. {{ number_format($bukuTamu->katalogs->harga, 0) }}
+                                                        </td>
                                                         <td>{{ $bukuTamu->tanggal }}</td>
                                                         <td>
                                                             @if ($bukuTamu->gambar)
-                                                                <a href="{{ Storage::url($bukuTamu->gambar) }}"
+                                                                <a href="{{ route('lihat_gambar', ['id' => $bukuTamu->id, 'type' => 'gambar']) }}"
                                                                     target="_blank">Lihat Gambar</a>
                                                             @else
                                                                 Belum diunggah
@@ -137,7 +140,7 @@
                                                         </td>
                                                         <td>
                                                             @if ($bukuTamu->Bukti_Tf)
-                                                                <a href="{{ asset('storage/images/bukti_pembayaran/' . $bukuTamu->Bukti_Tf) }}"
+                                                                <a href="{{ route('lihat_gambar', ['id' => $bukuTamu->id, 'type' => 'bukti']) }}"
                                                                     target="_blank">Lihat Bukti TF</a>
                                                             @else
                                                                 <a href="/pembayaran"
@@ -148,13 +151,13 @@
 
                                                         <!-- Modifikasi di sini untuk menampilkan "menunggu konfirmasi" -->
                                                         <td>
-                                                            {{ $bukuTamu->status === 'Lunas' ? $bukuTamu->status : 'Menunggu Konfirmasi' }}
+                                                            {{ $bukuTamu->status }}
                                                         </td>
 
                                                         @if (auth()->user()->role == 'cashier')
-                                                            <td><a href="/approved/{{ $bukuTamu->id_user }}"
+                                                            <td><a href="/approved/{{ $bukuTamu->id }}"
                                                                     class="btn btn-success mr-2">Lunas</a></td>
-                                                            <td><a href="/delete/{{ $bukuTamu->id_user }}"
+                                                            <td><a href="/delete/{{ $bukuTamu->id }}"
                                                                     class="btn btn-danger mr-2">Delete</a></td>
                                                         @endif
 
@@ -173,6 +176,10 @@
                                                                 <button type="submit"
                                                                     class="btn btn-danger">Delete</button>
                                                             </form>
+                                                            @if ($bukuTamu->status === 'Belum Di Bayar')
+                                                                <a href="/pembayaran/{{ $bukuTamu->id }}"
+                                                                    class="btn btn-primary">Pembayaran</a>
+                                                            @endif
                                                         </td>
                                                         <td>
                                                             @if ($bukuTamu->status === 'Lunas')
