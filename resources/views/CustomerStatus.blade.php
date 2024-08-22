@@ -154,31 +154,26 @@
                                                             {{ $bukuTamu->status }}
                                                         </td>
 
-                                                        @if (auth()->user()->role == 'cashier')
-                                                            <td><a href="/approved/{{ $bukuTamu->id }}"
-                                                                    class="btn btn-success mr-2">Lunas</a></td>
-                                                            <td><a href="/delete/{{ $bukuTamu->id }}"
-                                                                    class="btn btn-danger mr-2">Delete</a></td>
-                                                        @endif
-
                                                         <!-- Modifikasi di sini untuk menampilkan "menunggu konfirmasi" -->
                                                         <td>
                                                             {{ $bukuTamu->nomor_antrian ?? 'Menunggu Konfirmasi' }}
                                                         </td>
 
                                                         <td>
-                                                            <form
-                                                                action="{{ route('bukuTamu.delete', $bukuTamu->id) }}"
-                                                                method="POST"
-                                                                onsubmit="return confirm('Are you sure you want to delete this item?');">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="btn btn-danger">Delete</button>
-                                                            </form>
                                                             @if ($bukuTamu->status === 'Belum Di Bayar')
+                                                                <form
+                                                                    action="{{ route('bukuTamu.delete', $bukuTamu->id) }}"
+                                                                    method="POST"
+                                                                    onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit"
+                                                                        class="btn btn-danger">Delete</button>
+                                                                </form>
                                                                 <a href="/pembayaran/{{ $bukuTamu->id }}"
                                                                     class="btn btn-primary">Pembayaran</a>
+                                                            @else
+                                                                <p>-</p>
                                                             @endif
                                                         </td>
                                                         <td>
@@ -196,34 +191,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="main-panel">
-                            <div class="content-wrapper">
-                                <div class="row">
-                                    <div class="col-lg-9 grid-margin stretch-card">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <h2 class="card-title">PERINGATAN !!!</h2>
-                                                <p style="color: black;">Apakah anda ingin melanjutkan Transaksi? Jika
-                                                    Iya Klik Button "Pembayaran"</p>
-                                                <a href="pembayaran" class="btn btn-primary">Pembayaran</a>
-                                                <br><br>
-                                                <p style="color: black;">Jika Tidak Silahkan klik button "Delete"
-                                                    scroll kesamping di Riwayat Pembelian </p>
-                                                <p style="color: black;">JIKA SUDAH LUNAS ABAIKAN PESAN INI ! </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
                     </div>
-                    <!-- main-panel ends -->
-                    <!-- <footer class="footer">
-          <div class="d-sm-flex justify-content-center">
-            <span class="text-center text-sm-center d-block d-sm-inline-block" style="color: black;">Copyright © 2021</span>
-          </div>
-        </footer> -->
                 </div>
             </div>
             <!-- container-scroller -->
